@@ -44,6 +44,8 @@ public interface Backend {
      */
     Statistics getStatistics(Tunnel tunnel) throws Exception;
 
+    String getTunnelInfo(Tunnel tunnel) throws Exception;
+
     /**
      * Determine version of underlying backend.
      *

@@ -248,6 +248,10 @@ class TunnelManager(private val configStore: ConfigStore) : BaseObservable() {
         tunnel.onStatisticsChanged(withContext(Dispatchers.IO) { getBackend().getStatistics(tunnel) })!!
     }
 
+    suspend fun getTunnelInfo(tunnel: ObservableTunnel): String = withContext(Dispatchers.Main.immediate) {
+        tunnel.onTunnelInfoChanged(withContext(Dispatchers.IO) { getBackend().getTunnelInfo(tunnel) })!!
+    }
+
     companion object {
         private const val TAG = "WireGuard/TunnelManager"
     }

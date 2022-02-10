@@ -159,6 +159,15 @@ public final class GoBackend implements Backend {
         return stats;
     }
 
+    @Override
+    public String getTunnelInfo(final Tunnel tunnel) {
+        String config = "";
+        if (tunnel != currentTunnel || currentTunnelHandle == -1)
+            return config;
+        config = wgGetConfig(currentTunnelHandle);
+        return config;
+    }
+
     /**
      * Get the version of the underlying wireguard-go library.
      *
@@ -407,6 +416,7 @@ public final class GoBackend implements Backend {
                 if (alwaysOnCallback != null)
                     alwaysOnCallback.alwaysOnTriggered();
             }
+
             return super.onStartCommand(intent, flags, startId);
         }
 

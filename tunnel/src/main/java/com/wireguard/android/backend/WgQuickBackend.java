@@ -100,6 +100,10 @@ public final class WgQuickBackend implements Backend {
         return stats;
     }
 
+    @Override public String getTunnelInfo(final Tunnel tunnel) throws Exception {
+        return null;
+    }
+
     @Override
     public String getVersion() throws Exception {
         final List<String> output = new ArrayList<>();

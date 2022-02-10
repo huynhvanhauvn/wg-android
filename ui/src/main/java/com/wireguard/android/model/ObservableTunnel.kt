@@ -21,10 +21,10 @@ import kotlinx.coroutines.withContext
  * Encapsulates the volatile and nonvolatile state of a WireGuard tunnel.
  */
 class ObservableTunnel internal constructor(
-        private val manager: TunnelManager,
-        private var name: String,
-        config: Config?,
-        state: Tunnel.State
+    private val manager: TunnelManager,
+    private var name: String,
+    config: Config?,
+    state: Tunnel.State
 ) : BaseObservable(), Keyed<String>, Tunnel {
     override val key
         get() = name
@@ -61,12 +61,13 @@ class ObservableTunnel internal constructor(
         return state
     }
 
-    suspend fun setStateAsync(state: Tunnel.State): Tunnel.State = withContext(Dispatchers.Main.immediate) {
-        if (state != this@ObservableTunnel.state)
-            manager.setTunnelState(this@ObservableTunnel, state)
-        else
-            this@ObservableTunnel.state
-    }
+    suspend fun setStateAsync(state: Tunnel.State): Tunnel.State =
+        withContext(Dispatchers.Main.immediate) {
+            if (state != this@ObservableTunnel.state)
+                manager.setTunnelState(this@ObservableTunnel, state)
+            else
+                this@ObservableTunnel.state
+        }
 
 
     @get:Bindable
@@ -136,6 +137,36 @@ class ObservableTunnel internal constructor(
         return statistics
     }
 
+    @get:Bindable
+    var tunnelInfo: String? = null
+        get() {
+//            if (field.isNullOrEmpty())
+            // Opportunistically fetch this if we don't have a cached one, and rely on data bindings to update it eventually
+            applicationScope.launch {
+                try {
+                    manager.getTunnelInfo(this@ObservableTunnel)
+                } catch (e: Throwable) {
+                    Log.e(TAG, Log.getStackTraceString(e))
+                }
+            }
+            return field
+        }
+        private set
+
+    suspend fun getTunnelInfoAsync(): String = withContext(Dispatchers.Main.immediate) {
+        statistics.let {
+//            if (it == null || it.isStale)
+            manager.getTunnelInfo(this@ObservableTunnel)
+//            else
+//                it
+        }
+    }
+
+    fun onTunnelInfoChanged(tunnelInfo: String?): String? {
+        this.tunnelInfo = tunnelInfo
+        notifyPropertyChanged(BR.tunnelInfo)
+        return tunnelInfo
+    }
 
     suspend fun deleteAsync() = manager.delete(this)
 
